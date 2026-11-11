@@ -1,0 +1,4 @@
+// Release: the deployed web app, from NEXT_PUBLIC_APP_URL.
+#include? "Secrets.xcconfig"
+
+API_BASE_URL = $(APP_URL)

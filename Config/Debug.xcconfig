@@ -1,0 +1,5 @@
+// Debug: the app talks to `npm run dev` on this Mac. The simulator reaches
+// the Mac at localhost.
+#include? "Secrets.xcconfig"
+
+API_BASE_URL = http:/$()/localhost:3000

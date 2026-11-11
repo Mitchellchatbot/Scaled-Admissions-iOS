@@ -1,0 +1,43 @@
+# Generates ScaledAdmissions.xcodeproj. Run `xcodegen` in this folder after
+# adding or moving files; the .xcodeproj itself is not checked in.
+name: ScaledAdmissions
+options:
+  bundleIdPrefix: org.scaledai
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.41.1
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: L6G337564F
+    CODE_SIGN_STYLE: Automatic
+targets:
+  ScaledAdmissions:
+    type: application
+    platform: iOS
+    sources:
+      - path: ScaledAdmissions
+    entitlements:
+      path: ScaledAdmissions/ScaledAdmissions.entitlements
+      properties:
+        # Xcode switches this to production when archiving for TestFlight.
+        aps-environment: development
+    configFiles:
+      Debug: Config/Debug.xcconfig
+      Release: Config/Release.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.scaledai.admissions
+        PRODUCT_NAME: ScaledAdmissions
+        INFOPLIST_FILE: ScaledAdmissions/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 2
+    dependencies:
+      - package: Supabase
+        product: Supabase
