@@ -79,6 +79,11 @@ struct ThreadMessage: Identifiable, Hashable, Sendable {
 struct Hold: Hashable, Sendable {
     let reason: String
     let crisis: Bool
+    /// When the agent raised it.
+    var raisedAt: Date? = nil
+    /// "now" for a call right away, "scheduled" for a booked callback.
+    var handoff: String? = nil
+    var callbackAt: Date? = nil
 }
 
 /// How a lead reached the page, labelled like lib/referralDisplay.ts: the ad's

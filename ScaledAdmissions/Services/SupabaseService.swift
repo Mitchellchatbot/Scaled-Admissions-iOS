@@ -309,14 +309,15 @@ final class SupabaseService: @unchecked Sendable {
 
     /// Mirrors loadHold in lib/inbox.ts.
     func fetchHold(conversationID: String) async throws -> Hold? {
-        struct Payload: Decodable { let reason: String? }
+        struct Payload: Decodable { let reason: String?; let handoff: String?; let callbackWhen: String? }
         struct Row: Decodable {
             let kind: String
             let payload: Payload?
+            let created_at: String?
         }
         let rows: [Row] = try await client
             .from("alerts")
-            .select("kind, payload")
+            .select("kind, payload, created_at")
             .eq("conversation_id", value: conversationID)
             .in("kind", values: ["crisis", "system"])
             .neq("state", value: "acknowledged")
@@ -324,7 +325,13 @@ final class SupabaseService: @unchecked Sendable {
             .execute()
             .value
         guard let pick = rows.first(where: { $0.kind == "crisis" }) ?? rows.first else { return nil }
-        return Hold(reason: Labels.reason(pick.payload?.reason ?? ""), crisis: pick.kind == "crisis")
+        return Hold(
+            reason: Labels.reason(pick.payload?.reason ?? ""),
+            crisis: pick.kind == "crisis",
+            raisedAt: ISODate.parse(pick.created_at),
+            handoff: pick.payload?.handoff,
+            callbackAt: ISODate.parse(pick.payload?.callbackWhen)
+        )
     }
 }
 

@@ -44,8 +44,10 @@ final class ConversationListViewModel: ObservableObject {
     var isSearchActive: Bool { !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     /// Search results when searching, the filtered pages otherwise.
+    /// Search looks across every chat, whatever the filter: the list opens on
+    /// one stage, and a name typed in search should still turn up.
     var displayedConversations: [ConversationSummary] {
-        (isSearchActive ? searchHits : conversations).filter(filter.matches)
+        isSearchActive ? searchHits : conversations.filter(filter.matches)
     }
 
     /// Loaded chats whose name or id matches show at once, as on the web; the
