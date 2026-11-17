@@ -92,6 +92,8 @@ enum LeadSource: Hashable, Sendable {
     case ad(String?)
     case link(String?)
     case websiteChat
+    /// A website lead the team texts from Scaled Sync, mirrored in with the AI off.
+    case website
     /// Messaged the page with no referral attached.
     case direct
 
@@ -105,6 +107,7 @@ enum LeadSource: Hashable, Sendable {
         case "ADS": self = .ad(name)
         case "SHORTLINK": self = .link(name)
         case "CUSTOMER_CHAT_PLUGIN": self = .websiteChat
+        case "WEBSITE": self = .website
         default:
             if clean(adID) != nil || clean(campaign) != nil || clean(adTitle) != nil { self = .ad(name) }
             else if let name { self = .link(name) }
@@ -117,6 +120,7 @@ enum LeadSource: Hashable, Sendable {
         case .ad(let name): name ?? "Ad"
         case .link(let name): name ?? "Link"
         case .websiteChat: "Website chat"
+        case .website: "Website"
         case .direct: "Direct"
         }
     }
@@ -125,7 +129,7 @@ enum LeadSource: Hashable, Sendable {
         switch self {
         case .ad: "megaphone.fill"
         case .link: "link"
-        case .websiteChat: "globe"
+        case .websiteChat, .website: "globe"
         case .direct: "bubble.left.fill"
         }
     }
@@ -171,8 +175,8 @@ enum Labels {
 
 /// The filter sheet's choices (Care Assist's ConversationFilter, for admissions).
 struct ConversationFilter: Equatable {
-    /// What the list opens on: the leads ready for a call.
-    static let standard = ConversationFilter(stage: "ready")
+    /// What the list opens on: every conversation, no filter.
+    static let standard = ConversationFilter()
 
     var stage: String? = nil
     var channel: String? = nil

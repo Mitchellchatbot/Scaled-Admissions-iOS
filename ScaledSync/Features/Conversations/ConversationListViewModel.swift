@@ -44,8 +44,8 @@ final class ConversationListViewModel: ObservableObject {
     var isSearchActive: Bool { !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     /// Search results when searching, the filtered pages otherwise.
-    /// Search looks across every chat, whatever the filter: the list opens on
-    /// one stage, and a name typed in search should still turn up.
+    /// Search looks across every chat, whatever the filter: with a stage
+    /// picked, a name typed in search should still turn up.
     var displayedConversations: [ConversationSummary] {
         isSearchActive ? searchHits : conversations.filter(filter.matches)
     }
@@ -60,8 +60,8 @@ final class ConversationListViewModel: ObservableObject {
         return byID.values.sorted(by: ConversationSummary.newestFirst)
     }
 
-    /// Every stage, always: the list holds one stage at a time, so what is
-    /// loaded says nothing about which others have chats.
+    /// Every stage, always: filtered to a stage, the list holds only that one,
+    /// so what is loaded says nothing about which others have chats.
     var availableStages: [String] { Labels.stageOrder }
 
     var availableChannels: [String] {
