@@ -35,6 +35,12 @@
 	<string>$(SUPABASE_ANON_KEY)</string>
 	<key>API_BASE_URL</key>
 	<string>$(API_BASE_URL)</string>
+	<key>SYNC_SUPABASE_URL</key>
+	<string>$(SYNC_SUPABASE_URL)</string>
+	<key>SYNC_SUPABASE_ANON_KEY</key>
+	<string>$(SYNC_SUPABASE_ANON_KEY)</string>
+	<key>SYNC_APP_URL</key>
+	<string>$(SYNC_APP_URL)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

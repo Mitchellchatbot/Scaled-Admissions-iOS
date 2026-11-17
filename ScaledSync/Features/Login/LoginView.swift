@@ -77,6 +77,13 @@ struct LoginView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .onSubmit(signIn)
 
+                    if let resetURL = AppConfig.syncAppURL?.appending(path: "login") {
+                        Link("Forgot your password?", destination: resetURL)
+                            .font(.footnote)
+                            .foregroundStyle(Theme.accentText)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
@@ -134,8 +141,10 @@ struct LoginView: View {
             defer { isLoading = false }
             do {
                 try await appState.signIn(email: address, password: password)
+            } catch let failure as MobileAPI.Failure {
+                errorMessage = failure.message
             } catch {
-                errorMessage = "That email and password did not match."
+                errorMessage = "Could not sign you in. Try again."
             }
         }
     }

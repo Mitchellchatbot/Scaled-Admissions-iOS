@@ -18,6 +18,9 @@ final class AppState: ObservableObject {
     @Published var pendingConversationID: String?
 
     private static let workspaceKey = "currentWorkspaceID"
+    private static let syncCheckKey = "lastSyncLoginCheck"
+    /// How often a launch asks Scaled Sync whether the login still stands.
+    private static let syncCheckInterval: TimeInterval = 24 * 60 * 60
     private var authTask: Task<Void, Never>?
     private var client: SupabaseClient { SupabaseService.shared.client }
 
@@ -31,14 +34,19 @@ final class AppState: ObservableObject {
         // must not sign anyone out. The SDK refreshes the token when it is next used.
         if let session = client.auth.currentSession {
             await didSignIn(session.user)
+            Task { await checkSyncLogin() }
         } else {
             phase = .signedOut
         }
         observeAuth()
     }
 
+    /// The password is the person's Scaled Sync one; SyncAuth trades that
+    /// sign-in for a session in this app's project.
     func signIn(email: String, password: String) async throws {
-        let session = try await client.auth.signIn(email: email, password: password)
+        let tokens = try await SyncAuth.signIn(email: email, password: password)
+        let session = try await client.auth.setSession(accessToken: tokens.access_token, refreshToken: tokens.refresh_token)
+        UserDefaults.standard.set(Date(), forKey: Self.syncCheckKey)
         await didSignIn(session.user)
     }
 
@@ -46,7 +54,24 @@ final class AppState: ObservableObject {
         // While still signed in: the server only lets a phone's owner forget it.
         await PushManager.shared.disable()
         try? await client.auth.signOut()
+        await SyncAuth.signOut()
         reset()
+    }
+
+    /// This app's session refreshes itself and would outlive a Scaled Sync
+    /// login that was removed, so once a day a launch asks Scaled Sync. Only a
+    /// clear "no" signs out; offline launches carry on.
+    private func checkSyncLogin() async {
+        let last = UserDefaults.standard.object(forKey: Self.syncCheckKey) as? Date ?? .distantPast
+        guard Date().timeIntervalSince(last) >= Self.syncCheckInterval else { return }
+        switch await SyncAuth.stillValid() {
+        case .valid:
+            UserDefaults.standard.set(Date(), forKey: Self.syncCheckKey)
+        case .revoked:
+            await signOut()
+        case .unknown:
+            break
+        }
     }
 
     func reloadWorkspaces() async {

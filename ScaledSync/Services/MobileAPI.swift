@@ -22,6 +22,29 @@ enum MobileAPI {
         try await post("api/mobile/devices", json: ["token": token], method: "DELETE")
     }
 
+    /// A Scaled Sync access token in, a session for this app's project out (SyncAuth).
+    static func exchangeSyncToken(_ token: String) async throws -> SyncAuth.Tokens {
+        guard let base = AppConfig.apiBaseURL else { throw Failure(message: "The app is not set up yet.") }
+        var request = URLRequest(url: base.appending(path: "api/mobile/session"))
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 20
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw Failure(message: "Could not reach Scaled Sync. Check your connection.")
+        }
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            struct Body: Decodable { let error: String? }
+            let serverMessage = (try? JSONDecoder().decode(Body.self, from: data))?.error
+            throw Failure(message: serverMessage ?? "Could not sign you in. Try again.")
+        }
+        return try JSONDecoder().decode(SyncAuth.Tokens.self, from: data)
+    }
+
     static func setMode(conversationID: String, mode: ConversationMode) async throws {
         try await post("api/mobile/conversations/\(conversationID)/mode", json: ["mode": mode.rawValue])
     }

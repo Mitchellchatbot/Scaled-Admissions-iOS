@@ -6,9 +6,15 @@ enum AppConfig {
     static var supabaseAnonKey: String { string("SUPABASE_ANON_KEY") }
     /// The Next.js app. Replies and the AI switch go through it (app/api/mobile).
     static var apiBaseURL: URL? { url("API_BASE_URL") }
+    /// Scaled Sync's project, where people's passwords live (SyncAuth).
+    static var syncSupabaseURL: URL? { url("SYNC_SUPABASE_URL") }
+    static var syncSupabaseAnonKey: String { string("SYNC_SUPABASE_ANON_KEY") }
+    /// The Scaled Sync web app, where passwords are changed and reset.
+    static var syncAppURL: URL? { url("SYNC_APP_URL") }
 
     static var isConfigured: Bool {
         supabaseURL != nil && !supabaseAnonKey.isEmpty && apiBaseURL != nil
+            && syncSupabaseURL != nil && !syncSupabaseAnonKey.isEmpty
     }
 
     private static func string(_ key: String) -> String {

@@ -432,11 +432,6 @@ extension SupabaseService {
         )
     }
 
-    // MARK: - Account
-
-    func updatePassword(_ password: String) async throws {
-        try await client.auth.update(user: UserAttributes(password: password))
-    }
 }
 
 /// Postgres timestamps arrive as ISO 8601, with or without fractional seconds.
