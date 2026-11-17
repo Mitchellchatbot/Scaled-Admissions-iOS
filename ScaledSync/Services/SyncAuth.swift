@@ -1,8 +1,9 @@
 import Foundation
 import Supabase
 
-/// One login for Scaled Sync and this app. Passwords live in the Scaled Sync
-/// Supabase project: we sign in there, then trade that token for a session in
+/// One login for Scaled Sync and this app. For someone whose password is not
+/// this app's own (AppState.signIn tries that first), we sign in to the
+/// Scaled Sync Supabase project, then trade that token for a session in
 /// this app's project at app/api/mobile/session (lib/syncAuth.ts on the web
 /// side). The Scaled Sync session is kept, under its own keychain key, so the
 /// app can notice when that login is revoked (`stillValid`).

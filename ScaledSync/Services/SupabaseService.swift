@@ -432,6 +432,13 @@ extension SupabaseService {
         )
     }
 
+    // MARK: - Account
+
+    /// This project's password, for someone who signs in with it rather than
+    /// with their Scaled Sync one (AppState.signedInWithSync).
+    func updatePassword(_ password: String) async throws {
+        try await client.auth.update(user: UserAttributes(password: password))
+    }
 }
 
 /// Postgres timestamps arrive as ISO 8601, with or without fractional seconds.

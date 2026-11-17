@@ -8,6 +8,9 @@ final class AppState: ObservableObject {
 
     @Published private(set) var phase: Phase = .starting
     @Published private(set) var email: String?
+    /// Signed in with a Scaled Sync password (SyncAuth) rather than this
+    /// app's own, so the password is changed in Scaled Sync.
+    @Published private(set) var signedInWithSync = false
     @Published private(set) var workspaces: [Workspace] = []
     @Published private(set) var workspacesError: String?
     @Published var currentWorkspace: Workspace? {
@@ -41,9 +44,23 @@ final class AppState: ObservableObject {
         observeAuth()
     }
 
-    /// The password is the person's Scaled Sync one; SyncAuth trades that
-    /// sign-in for a session in this app's project.
+    /// This app's own password first, so anyone with one signs in as before.
+    /// Only when it is refused is the password tried as the person's Scaled
+    /// Sync one, and SyncAuth trades that sign-in for a session here.
     func signIn(email: String, password: String) async throws {
+        do {
+            let session = try await client.auth.signIn(email: email, password: password)
+            await SyncAuth.signOut()
+            await didSignIn(session.user)
+            return
+        } catch let AuthError.api(_, _, _, response) where response.statusCode == 429 {
+            throw MobileAPI.Failure(message: "Too many attempts. Wait a minute and try again.")
+        } catch AuthError.api {
+            // Wrong password here, or no account here: try Scaled Sync.
+        } catch {
+            throw MobileAPI.Failure(message: "Could not reach Scaled Sync. Check your connection.")
+        }
+
         let tokens = try await SyncAuth.signIn(email: email, password: password)
         let session = try await client.auth.setSession(accessToken: tokens.access_token, refreshToken: tokens.refresh_token)
         UserDefaults.standard.set(Date(), forKey: Self.syncCheckKey)
@@ -81,6 +98,7 @@ final class AppState: ObservableObject {
 
     private func didSignIn(_ user: User) async {
         email = user.email
+        signedInWithSync = SyncAuth.client.auth.currentSession != nil
         await loadWorkspaces(userID: user.id)
         phase = .signedIn
         Task { await PushManager.shared.enable() }
@@ -100,6 +118,7 @@ final class AppState: ObservableObject {
     private func reset() {
         phase = .signedOut
         email = nil
+        signedInWithSync = false
         workspaces = []
         currentWorkspace = nil
     }

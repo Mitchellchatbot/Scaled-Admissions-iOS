@@ -1,8 +1,13 @@
 import SwiftUI
 
-/// Care Assist's account page: who you are, your workspace, where to change your password, sign out.
+/// Care Assist's account page: who you are, your workspace, password, sign out.
 struct AccountSettingsView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
+    @State private var isSavingPassword = false
+    @State private var successMessage: String?
+    @State private var errorMessage: String?
     @State private var showSignOutConfirm = false
 
     var body: some View {
@@ -18,6 +23,9 @@ struct AccountSettingsView: View {
                 VStack(spacing: 24) {
                     avatarSection
 
+                    if let successMessage { feedbackBanner(successMessage, isError: false) }
+                    if let errorMessage { feedbackBanner(errorMessage, isError: true) }
+
                     settingsCard(title: "Workspace") {
                         if appState.workspaces.count > 1 {
                             VStack(spacing: 8) {
@@ -31,7 +39,11 @@ struct AccountSettingsView: View {
                     }
 
                     settingsCard(title: "Security") {
-                        securityRow
+                        if appState.signedInWithSync {
+                            syncPasswordRow
+                        } else {
+                            passwordForm
+                        }
                     }
 
                     Button {
@@ -127,9 +139,36 @@ struct AccountSettingsView: View {
         .padding(.horizontal)
     }
 
-    /// Passwords live in Scaled Sync, so they are changed there.
+    /// Someone who signed in with this app's own password changes it here.
+    private var passwordForm: some View {
+        VStack(spacing: 14) {
+            secureField(icon: "lock", placeholder: "New Password", text: $newPassword)
+            secureField(icon: "lock.rotation", placeholder: "Confirm Password", text: $confirmPassword)
+
+            Button {
+                Task { await savePassword() }
+            } label: {
+                HStack {
+                    if isSavingPassword {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Update Password").fontWeight(.semibold)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .foregroundStyle(.white)
+                .background(Theme.accentText)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: Theme.accent.opacity(0.3), radius: 6, y: 3)
+            }
+            .disabled(isSavingPassword)
+        }
+    }
+
+    /// Someone who signed in with their Scaled Sync password changes it there.
     @ViewBuilder
-    private var securityRow: some View {
+    private var syncPasswordRow: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("You sign in with your Scaled Sync password.")
                 .font(.subheadline)
@@ -150,5 +189,56 @@ struct AccountSettingsView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func secureField(icon: String, placeholder: String, text: Binding<String>) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundStyle(Theme.ink3)
+                .frame(width: 20)
+            SecureField(placeholder, text: text)
+                .textContentType(.newPassword)
+        }
+        .padding()
+        .background(Theme.chipFlat)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func feedbackBanner(_ message: String, isError: Bool) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: isError ? "exclamationmark.circle" : "checkmark.circle")
+            Text(message).font(.subheadline)
+        }
+        .foregroundStyle(isError ? Theme.badText : Theme.goodText)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isError ? Theme.badSoft : Theme.goodSoft)
+        )
+        .padding(.horizontal)
+    }
+
+    private func savePassword() async {
+        successMessage = nil
+        errorMessage = nil
+        guard newPassword.count >= 8 else {
+            errorMessage = "Use at least 8 characters."
+            return
+        }
+        guard newPassword == confirmPassword else {
+            errorMessage = "The passwords do not match."
+            return
+        }
+        isSavingPassword = true
+        defer { isSavingPassword = false }
+        do {
+            try await SupabaseService.shared.updatePassword(newPassword)
+            newPassword = ""
+            confirmPassword = ""
+            successMessage = "Password updated."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
