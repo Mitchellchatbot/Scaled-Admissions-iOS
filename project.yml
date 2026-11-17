@@ -1,6 +1,6 @@
-# Generates ScaledAdmissions.xcodeproj. Run `xcodegen` in this folder after
+# Generates ScaledSync.xcodeproj. Run `xcodegen` in this folder after
 # adding or moving files; the .xcodeproj itself is not checked in.
-name: ScaledAdmissions
+name: ScaledSync
 options:
   bundleIdPrefix: org.scaledai
   deploymentTarget:
@@ -16,13 +16,13 @@ settings:
     DEVELOPMENT_TEAM: L6G337564F
     CODE_SIGN_STYLE: Automatic
 targets:
-  ScaledAdmissions:
+  ScaledSync:
     type: application
     platform: iOS
     sources:
-      - path: ScaledAdmissions
+      - path: ScaledSync
     entitlements:
-      path: ScaledAdmissions/ScaledAdmissions.entitlements
+      path: ScaledSync/ScaledSync.entitlements
       properties:
         # Xcode switches this to production when archiving for TestFlight.
         aps-environment: development
@@ -33,7 +33,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.scaledai.admissions
         PRODUCT_NAME: ScaledSync
-        INFOPLIST_FILE: ScaledAdmissions/Info.plist
+        INFOPLIST_FILE: ScaledSync/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: 0.1.0

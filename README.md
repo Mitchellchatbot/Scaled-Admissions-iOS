@@ -13,8 +13,8 @@ this folder; set `WEB_APP_DIR` if it lives somewhere else.
 brew install xcodegen          # once
 cd ~/scaled-admissions-ios
 ./scripts/write-secrets.sh     # copies the public Supabase URL + key from the web app's .env.local
-xcodegen                       # makes ScaledAdmissions.xcodeproj (not checked in)
-open ScaledAdmissions.xcodeproj
+xcodegen                       # makes ScaledSync.xcodeproj (not checked in)
+open ScaledSync.xcodeproj
 ```
 
 Debug builds talk to `npm run dev` at `http://localhost:3000`. Release builds

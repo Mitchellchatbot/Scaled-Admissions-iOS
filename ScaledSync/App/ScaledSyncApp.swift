@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ScaledAdmissionsApp: App {
+struct ScaledSyncApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
 
