@@ -84,7 +84,7 @@ struct AccountSettingsView: View {
         }
         .navigationTitle("Account")
         .navigationBarTitleDisplayMode(.large)
-        .confirmationDialog("Sign out of Scaled Admissions?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
+        .confirmationDialog("Sign out of Scaled Sync?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) {
                 Task { await appState.signOut() }
             }

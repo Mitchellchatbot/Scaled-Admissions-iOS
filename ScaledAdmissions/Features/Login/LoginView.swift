@@ -27,7 +27,7 @@ struct LoginView: View {
                         .frame(height: 84)
                         .shadow(color: Theme.accent.opacity(0.35), radius: 10, y: 5)
 
-                    Text("Scaled Admissions")
+                    Text("Scaled Sync")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundStyle(Theme.ink)
 

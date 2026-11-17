@@ -59,7 +59,7 @@ enum MobileAPI {
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw Failure(message: "Could not reach Scaled Admissions. Check your connection.")
+            throw Failure(message: "Could not reach Scaled Sync. Check your connection.")
         }
 
         guard let http = response as? HTTPURLResponse else { throw Failure(message: "Could not send.") }

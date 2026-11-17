@@ -1,4 +1,4 @@
-# Scaled Admissions for iOS
+# Scaled Sync for iOS
 
 A SwiftUI app for the shared inbox: see every conversation, read the thread,
 reply as yourself, and switch the AI on or off for a chat. Modelled on the
